@@ -1,5 +1,26 @@
 import * as vscode from 'vscode';
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
+
+function decodeText(s: string) {
+  const entities = [
+    ['amp', '&'],
+    ['apos', '\''],
+    ['#x27', '\''],
+    ['#x2F', '/'],
+    ['#39', '\''],
+    ['#47', '/'],
+    ['lt', '<'],
+    ['gt', '>'],
+    ['nbsp', ' '],
+    ['quot', '"']
+  ];
+
+  for (var i = 0, max = entities.length; i < max; ++i) {
+    s = s.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+  }
+
+  return s;
+}
 
 export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('visual-overflow.search', () => {
@@ -8,14 +29,12 @@ export function activate(context: vscode.ExtensionContext) {
     picker.placeholder = "Search Stack Overflow";
     picker.onDidChangeValue(async s => {
       picker.busy = true;
-      console.log('a')
       let res = await fetch('https://api.stackexchange.com/search?' + new URLSearchParams({
         intitle: s,
         site: 'stackoverflow'
       }));
-      console.log('b')
       let json: any = await res.json();
-      picker.items = json.items.map((q: any) => {return {label: q.title}});
+      picker.items = json.items.map((q: any) => {return {label: decodeText(q.title)}});
       picker.busy = false;
     });
     picker.onDidAccept(e => {
