@@ -29,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 			let picker = vscode.window.createQuickPick();
 			picker.title = 'Search';
 			picker.placeholder = 'Search Stack Overflow';
+
 			picker.onDidChangeValue(async (s) => {
 				picker.busy = true;
 				let res = await fetch(
@@ -40,21 +41,22 @@ export function activate(context: vscode.ExtensionContext) {
 				);
 				let json: any = await res.json();
 				picker.items = json.items.map((q: any) => {
-					return { label: decodeText(q.title) };
+					return { label: decodeText(q.title), q };
 				});
 				picker.busy = false;
 			});
-			picker.onDidAccept((e) => {
-				const question = picker.activeItems[0];
-				console.log(question);
+
+			picker.onDidAccept(() => {
+        // TODO: union type
+				const question: any = picker.selectedItems[0];
 				// TODO: render question
 				let panel = vscode.window.createWebviewPanel(
 					'visualOverflow',
-					'TODO',
+					decodeText(question.q.title),
 					vscode.ViewColumn.Beside,
 					{}
 				);
-				panel.webview.html = '<h1>TODO</h1>' + JSON.stringify(e);
+				panel.webview.html = `<h1>${question.q.title}</h1>`;
 			});
 			picker.show();
 		}
