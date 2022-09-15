@@ -47,8 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 
 			picker.onDidAccept(() => {
-        // TODO: union type
-				const question: any = picker.selectedItems[0];
+        // See response data for https://api.stackexchange.com/docs/search
+				const question: vscode.QuickPickItem & { q?: any } = picker.selectedItems[0];
 				// TODO: render question
 				let panel = vscode.window.createWebviewPanel(
 					'visualOverflow',
